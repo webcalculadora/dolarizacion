@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página con 5 Columnas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .contenedor {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .fila {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .columna {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .columna:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup h2 {
+            margin-bottom: 10px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <div class="fila">
+            <div class="columna">
+                <label for="trabajo">Trabajo</label>
+                <select id="trabajo">
+                    <option value="medico">Médico</option>
+                    <option value="maestro">Maestro de primaria</option>
+                    <option value="jubilado">Jubilado</option>
+                    <option value="plan-social">Cobro un plan Social</option>
+                    <option value="mecanico">Mecánico</option>
+                </select>
+            </div>
+
+            <div class="columna">
+                <label for="salario">Tu salario en pesos</label>
+                <input type="number" id="salario" min="0" step="1">
+            </div>
+
+            <div class="columna">
+                <button id="calcular">Calcular</button>
+            </div>
+        </div>
+
+        <div class="fila">
+            <div class="columna">
+                <h2>Precio del dólar blue</h2>
+                <p id="dolarBlue">Cargando...</p>
+            </div>
+
+            <div class="columna">
+                <h2>Pasivo BCRA en pesos</h2>
+                <p>$1000</p>
+            </div>
+
+            <div class="columna">
+                <h2>Dolarizas a</h2>
+                <p id="totalDolar"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <h2>Resultado del cálculo</h2>
+        <p id="resultadoPopup"></p>
+        <p>No te alcanza para alquilar, igual no importa porque Milei privatizó la educación y te echaron.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trabajo = document.getElementById('trabajo');
+            const salario = document.getElementById('salario');
+            const dolarBlue = document.getElementById('dolarBlue');
+            const pasivoBCRA = 1000; // Valor fijo
+            const totalDolar = document.getElementById('totalDolar');
+            const calcular = document.getElementById('calcular');
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            const resultadoPopup = document.getElementById('resultadoPopup');
+
+            // Obtener el valor del dolar blue de la API
+            fetch('https://api.bluelytics.com.ar/v2/latest')
+                .then(response => response.json())
+                .then(data => {
+                    dolarBlue.textContent = `$${data.blue.value_sell}`;
+                    const totalDolarValue = parseFloat(dolarBlue.textContent.replace('$', '')) + pasivoBCRA;
+                    totalDolar.textContent = `Dolarizas a $${totalDolarValue.toFixed(2)}`;
+                })
+                .catch(error => console.error('Error:', error));
+
+            // Calcular y mostrar popup
+            calcular.addEventListener('click', function() {
+                const salarioValue = parseFloat(salario.value);
+                const totalDolarValue = parseFloat(dolarBlue.textContent.replace('$', '')) + pasivoBCRA;
+                const resultadoValue = (salarioValue / totalDolarValue).toFixed(2);
+
+                resultadoPopup.textContent = `Tu salario es de $${resultadoValue}.`;
+                popup.style.display = 'block';
+                overlay.style.display = 'block';
+            });
+
+            // Cerrar popup al hacer clic en el overlay
+            overlay.addEventListener('click', function() {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
